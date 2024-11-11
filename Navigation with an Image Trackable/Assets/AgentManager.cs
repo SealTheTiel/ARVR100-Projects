@@ -1,13 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.XR.ARFoundation;
+using Unity.XR.CoreUtils;
 
 public class AgentManager : MonoBehaviour
 {
     List<ARAgent> agents = new List<ARAgent>();
+    public GameObject beacon;
+
     [SerializeField]
-    private GameObject beacon;
-    
+    private NavMeshSurface navmesh;
     // Start is called before the first frame update
     void Start()
     {
@@ -17,13 +22,18 @@ public class AgentManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!beacon.activeSelf) {
-            StopAllAgents();
-            return;
+        if (beacon == null) { return; }
+        GameObject floor = transform.parent.gameObject.GetNamedChild("Floor");
+        //check if beacon is on the navmeshsurface
+        if (navmesh.navMeshData != null) {
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(beacon.transform.position, out hit, 0.1f, NavMesh.AllAreas)) {
+                MoveAllAgents(beacon.transform.position);
+                return;
+            }
         }
-        foreach (ARAgent agent in agents) {
-            agent.MoveAgent(beacon.transform.position);
-        }
+        StopAllAgents();
+
     }
 
     public void MoveAllAgents(Vector3 position) {
@@ -36,5 +46,9 @@ public class AgentManager : MonoBehaviour
         foreach (ARAgent agent in agents) {
             agent.StopAgent();
         }
+    }
+
+    public void SetBeacon(GameObject beacon) {
+        this.beacon = beacon;
     }
 }

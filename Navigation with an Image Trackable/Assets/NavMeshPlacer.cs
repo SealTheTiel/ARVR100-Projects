@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework.Constraints;
+using Unity.AI.Navigation;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
@@ -14,6 +15,7 @@ public class NavMeshPlacer : MonoBehaviour
     private ARPlaneManager planeManager;
     private ARRaycastManager raycastManager;
     private List<ARRaycastHit> hitResults = new List<ARRaycastHit>();
+    private bool planesVisible = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -26,21 +28,23 @@ public class NavMeshPlacer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.touchCount < 1) { return; }
-        if (Input.GetTouch(0).phase == TouchPhase.Began) {
-            Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+        //if (Input.touchCount < 1) { return; }
+        //if (Input.GetTouch(0).phase == TouchPhase.Began) {
+        if (navmesh.activeSelf) { return; }
+        if (Input.GetMouseButtonDown(0)) {
+            // Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (raycastManager.Raycast(ray, hitResults, TrackableType.PlaneWithinPolygon)) {
-                navmesh.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
-                navmesh.transform.position = hitResults[0].pose.position;   
+                navmesh.transform.position = hitResults[0].pose.position + new Vector3(0, 0.2f, 0);   
                 navmesh.SetActive(true);
-                enabled = false;
             }
         }
     }
 
     public void TogglePlaneVisualizer() {
+        planesVisible = !planesVisible;
         foreach (ARPlane plane in planeManager.trackables) {
-            plane.gameObject.SetActive(!plane.gameObject.activeSelf);
+            plane.gameObject.SetActive(planesVisible);
         }
     }
 }
