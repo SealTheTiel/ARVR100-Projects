@@ -5,14 +5,16 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
+using TMPro;
 
 public class AgentManager : MonoBehaviour
 {
     List<ARAgent> agents = new List<ARAgent>();
     public GameObject beacon;
 
-    [SerializeField]
-    private NavMeshSurface navmesh;
+    [SerializeField] private GameObject BeaconWarn;
+
+    [SerializeField] private NavMeshSurface navmesh;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,10 +30,12 @@ public class AgentManager : MonoBehaviour
         if (navmesh.navMeshData != null) {
             NavMeshHit hit;
             if (NavMesh.SamplePosition(beacon.transform.position, out hit, 0.1f, NavMesh.AllAreas)) {
+                BeaconWarn.SetActive(false);
                 MoveAllAgents(beacon.transform.position);
                 return;
             }
         }
+        BeaconWarn.SetActive(true);
         StopAllAgents();
 
     }
